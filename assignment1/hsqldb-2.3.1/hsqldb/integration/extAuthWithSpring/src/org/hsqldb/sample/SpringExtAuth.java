@@ -32,10 +32,12 @@
 package org.hsqldb.sample;
 
 import java.sql.Connection;
+import java.sql.Statement;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
-
+import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.ApplicationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
