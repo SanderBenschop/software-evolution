@@ -30,9 +30,11 @@ public void main() {
 		set[loc] methods = methods(m3, class);
 		for (method <- methods)
 		{
-			list[str] contents = [ x | x <- readFileLines(method), !(/^\s*$/ := x) ];
-			list[str] filteredLines = [ x | x <- contents, !(/\\*+\\s*|\\s*\\*+/ := x), !(/^\s+\/\/$/ := x) ];
-			int lines = size (filteredLines);
+			 
+			list[str] contents = [ x | x <- readFileLines(method), !(/^\s*(\/\/)?$/ := x) ];
+			
+			
+			int lines = size (contents);
 			totalLines += lines;
 			println("method: <contents>\nloc: <lines>\n\n");
 		}
