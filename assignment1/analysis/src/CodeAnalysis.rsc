@@ -21,10 +21,12 @@ public void countLinesOfCode(loc projectLocator) {
 		set[loc] methods = methods(m3, class);
 		for (method <- methods)
 		{
-			list[str] contents = [ x | x <- readFileLines(method), !(/^\s*(\/\/)?$/ := x) ];
-			int lines = size (contents);
-			totalLines += lines;
-			println("method: <contents>\nloc: <lines>\n\n");
+	        list[str] contents = [ x | x <- readFileLines(method), !(/^\s*(\/\/)?$/ := x), !(/^(\t|\r|\n)+$/ := x) ];
+            str body = "";
+            for (str line <- contents) { 
+    	        body += line;
+            }
+            totalLines += size(contents);
 		}
 	}
 	
