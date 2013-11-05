@@ -1,0 +1,9 @@
+a. unit = method
+b. volume = lines of code - commented and empty lines, and man years, and counting database tables and fields (secondary measures)
+c. complexity per unit:
+    1. cyclometic complexity per unit -> results in risk level per unit, this risk level can be combined with the lines of code
+    2. optional: other complexity measures: fan-in, fan-out, coupling and stability measures
+d. duplicates blocks over 6 lines (each 6 lines that occur multiple times. Duplication exceeding 20%, means source code erosion being out of control. Code block = just a sequence of lines of code
+e. unit size = lines of code per unit (unit = method)????
+f. unit test coverage = rankings according to unit test coverage, count the number of assert statements (no rating scheme yet)
+g. aggregration
