@@ -17,5 +17,16 @@ public void main() {
 	tuple[set[Declaration] AST, M3 m3] analysis = performAnalysis(smallSqlLoc);
 	
 	int lines = countProjectSourceLoc(analysis.m3);
+	set[str] classNames = getClasses(analysis.AST);
 	println("Lines: <lines>");
+}
+
+private set[str] getClasses(set[Declaration] declarations) {
+	set[str] classNames = {};
+	for (Declaration compilationUnit <- declarations) {
+		for (javaClass <- compilationUnit.types) {
+			classNames += javaClass.name;
+		}
+	}
+	return classNames;
 }
