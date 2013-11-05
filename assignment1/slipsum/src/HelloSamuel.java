@@ -11,6 +11,9 @@ public class HelloSamuel {
 	
 	//This is the first paragraph
 	private static void printFirstParagraph() {
+		/**
+		 * This is inside a method.
+		 */
 		System.out.println("You think water moves fast? "
 				+ "You should see ice. It moves like it has a mind. "
 				+ "Like it knows it killed the world once and got a taste for murder. "
