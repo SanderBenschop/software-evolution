@@ -23,7 +23,7 @@ public void countLinesOfCode(loc projectLocator) {
 		{
             str contents = ( "" | it + line | str line <- readFileLines(method));
 			for (/(?s)\s*\/\*+<comment:[^(\*\/)]+>\*+\/|<code:(.*)>/ := contents) {
-				int i = 0;
+				totalLines = totalLines + 1;
 			}
 		}
 	}
