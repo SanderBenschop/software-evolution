@@ -22,6 +22,7 @@ public class HelloSamuel {
 				+ "but I know that seven of us survived the slide... and only five made it out. "
 				+ "Now we took an oath, that I'm breaking now. We said we'd say it was the snow that "
 				+ "killed the other two, but it wasn't. Nature is lethal but it doesn't hold a candle to man.");
+		"".replace("", "");
 	}
 	
 	/** This is the second paragraph. */

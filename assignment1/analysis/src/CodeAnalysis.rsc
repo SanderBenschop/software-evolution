@@ -6,8 +6,13 @@ import analysis::m3::metrics::LOC;
 import IO;
 import List;
 import Set;
+import String;
 
 public void countLinesOfCode(loc projectLocator) {
+	map[loc, map[loc, str]] filteredClasses = filterCommentsOutOfProject(projectLocator);
+}
+
+public map[loc, map[loc, str]] filterCommentsOutOfProject(loc projectLocator) {
 	tuple[set[Declaration] AST, M3 m3] analysis = performAnalysis(projectLocator);
 	
 	int lines = countProjectSourceLoc(analysis.m3);
@@ -16,21 +21,23 @@ public void countLinesOfCode(loc projectLocator) {
 
 	set[loc] classes = getClasses(ast);
 	int totalLines = 0;
+	map[loc, map[loc, str]] filteredClasses = ();
 	for (class <- classes)
 	{
 		set[loc] methods = methods(m3, class);
+		map[loc, str] filteredMethods = ();
 		for (method <- methods)
 		{
-            str contents = ( "" | it + line | str line <- readFileLines(method));
-			for (/(?s)\s*\/\*+<comment:[^(\*\/)]+>\*+\/|<code:(.*)>/ := contents) {
-				totalLines = totalLines + 1;
+		    list[str] filteredContents = [];
+            str contents = ( "" | it + line + "\n" | str line <- readFileLines(method));
+			for (/(?s)<comment:(\/\*+(.*)?\*+\/)|(\/\/(.*?)\n)>/ := contents) {
+				contents = replaceAll(contents, comment, "");
 			}
+			filteredMethods = filteredMethods + (method : contents);
 		}
+		filteredClasses = filteredClasses + (class : filteredMethods);
 	}
-	
-	println("Total lines: <totalLines>");
-	
- 	println("Classes: <classes>");	
+	return filteredClasses;
 }
 
 private tuple[set[Declaration], M3] performAnalysis(loc location) {
