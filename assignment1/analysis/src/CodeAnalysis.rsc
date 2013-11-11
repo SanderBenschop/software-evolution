@@ -6,15 +6,14 @@ import analysis::m3::metrics::LOC;
 import IO;
 import List;
 import Set;
+import Map;
 import String;
 
 public void countLinesOfCode(loc projectLocator) {
 	map[loc, map[loc, str]] filteredClasses = filterCommentsOutOfProject(projectLocator);
 	int linesOfCode = 0;
-	for (loc key <- filteredClasses) {
-		map[loc, str] filteredMethods = filteredClasses[key];
-		for (loc key <- filteredMethods) {
-			str method = filteredMethods[key];
+	for (map[loc, str] filteredMethods <- range(filteredClasses)) {
+		for (str method <- range(filteredMethods)) {
 			for (/(\S)*\n/ := method) {
 				linesOfCode = linesOfCode + 1;
 			}
