@@ -10,6 +10,18 @@ import String;
 
 public void countLinesOfCode(loc projectLocator) {
 	map[loc, map[loc, str]] filteredClasses = filterCommentsOutOfProject(projectLocator);
+	int linesOfCode = 0;
+	for (loc key <- filteredClasses) {
+		map[loc, str] filteredMethods = filteredClasses[key];
+		for (loc key <- filteredMethods) {
+			str method = filteredMethods[key];
+			for (/(\S)*\n/ := method) {
+				linesOfCode = linesOfCode + 1;
+			}
+		}
+	}
+	
+	println("Lines of code: <linesOfCode>");
 }
 
 public map[loc, map[loc, str]] filterCommentsOutOfProject(loc projectLocator) {
@@ -43,7 +55,6 @@ public map[loc, map[loc, str]] filterCommentsOutOfProject(loc projectLocator) {
 private tuple[set[Declaration], M3] performAnalysis(loc location) {
 	set[Declaration] declarations = createAstsFromEclipseProject(location, true);
 	M3 m3 = createM3FromEclipseProject(location);
-	
 	return <declarations, m3>;
 }
 
