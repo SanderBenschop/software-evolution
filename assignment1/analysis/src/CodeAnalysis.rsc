@@ -9,6 +9,10 @@ import Set;
 import String;
 import Map;
 
+public void findDuplicates(loc projectLocator) {
+	// [*x, block, *y] := anderefilecontent
+}
+
 public int countLinesOfCode(loc projectLocator) {
 	map[loc, map[loc, str]] filteredClasses = filterEffectiveLinesInProject(projectLocator);
 	
@@ -60,7 +64,7 @@ public map[loc, map[loc, str]] filterEffectiveLinesInProject(loc projectLocator)
 			// replace empty new lines
 			for (/<emptyline:\s*\n\n>/ := contents) {
 				contents = replaceAll(contents, emptyline, "\n");
-			} 
+			}
 
 			filteredMethods = filteredMethods + (method : contents);
 		}
