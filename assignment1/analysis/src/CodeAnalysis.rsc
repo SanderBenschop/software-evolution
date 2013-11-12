@@ -13,67 +13,58 @@ public void findDuplicates(loc projectLocator) {
 	// [*x, block, *y] := anderefilecontent
 }
 
-public int countLinesOfCode(loc projectLocator) {
-	map[loc, map[loc, str]] filteredClasses = filterEffectiveLinesInProject(projectLocator);
-	
-	int lines = 0;
-	// Loop each class
-	for (classLocation <- filteredClasses) {
-		int classLines = 0;
-		// Loop each method for the class
-		for (method <- filteredClasses[classLocation]) {
-			// Content of the method
-			str content = filteredClasses[classLocation][method];
-			println("method <method>: <content>");
-			
-			// Count lines in the method
-			int methodLines = size(split("\n", content));
-			println("Lines of method: <methodLines>");
-			classLines += methodLines;
-		}
-		println("Class lines: <classLines>");
-		lines += classLines;
-	}
-	
-	println("Total lines: <lines>");
-	return lines;
+public int countLinesOfCode(M3 model) {
+	str code = filterEffectiveLines(getProjectJavaContents(model));	
+	return size(split("\n", code));
 }
 
-public map[loc, map[loc, str]] filterEffectiveLinesInProject(loc projectLocator) {
-	tuple[set[Declaration] AST, M3 m3] analysis = performAnalysis(projectLocator);
+public str getProjectJavaContents(M3 model) {
+	set[loc] javaFiles = { file | file <- files(model), file.extension == "java" };
 	
-	int lines = countProjectSourceLoc(analysis.m3);
-	M3 m3 = analysis.m3;
-	set[Declaration] ast = analysis.AST;
-
-	set[loc] classes = getClasses(ast);
-	int totalLines = 0;
-	map[loc, map[loc, str]] filteredClasses = ();
-	for (class <- classes)
-	{
-		set[loc] methods = methods(m3, class);
-		map[loc, str] filteredMethods = ();
-		for (method <- methods)
-		{
-		    list[str] filteredContents = [];
-            str contents = ( "" | it + line + "\n" | str line <- readFileLines(method));
-			for (/(?s)<comment:(\/\*+(.*)?\*+\/)|(\/\/(.*?)\n)>/ := contents) {
-				contents = replaceAll(contents, comment, "");
-			}
-			
-			// replace empty new lines
-			for (/<emptyline:\s*\n\n>/ := contents) {
-				contents = replaceAll(contents, emptyline, "\n");
-			}
-
-			filteredMethods = filteredMethods + (method : contents);
+	str content = "";
+	for (file <- javaFiles) {
+		str fileContent = readFile(file);
+		content += fileContent;
+		if (!endsWith(fileContent, "\n")) {
+			content += "\n";
 		}
-		filteredClasses = filteredClasses + (class : filteredMethods);
-	}
-	return filteredClasses;
+	}	
+	
+	return content;
 }
 
-private tuple[set[Declaration], M3] performAnalysis(loc location) {
+public set[loc] getProjectClasses(set[Declaration] AST) {
+	return getClasses(AST);
+}
+
+public str filterEffectiveLines(str code) {
+    return removeTrailingAndEmptyLines(removeComments(code));
+}
+
+public str removeTrailingAndEmptyLines(str code) {
+    str nonSpacingCode = "";
+    for (/\s*<content:(.*)>(\n)*/ := code) {
+        nonSpacingCode += trim(content) + "\n";
+    }
+    
+    return nonSpacingCode; 	
+}
+
+public str removeComments(str code) {
+	// multiline comments
+	for (/(?s)<comment:(\/\*+(.*?)\*+\/)>/ := code) {
+		code = replaceAll(code, comment, "");
+	}
+
+	// single line comments
+	for (/(?s)<comment:(\/\/(.*?)\n)>/ := code) {
+         code = replaceAll(code, comment, "");
+	}	
+
+	return code;
+}
+
+public tuple[set[Declaration], M3] performAnalysis(loc location) {
 	set[Declaration] declarations = createAstsFromEclipseProject(location, true);
 	M3 m3 = createM3FromEclipseProject(location);
 	return <declarations, m3>;
