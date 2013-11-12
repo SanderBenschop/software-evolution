@@ -11,27 +11,59 @@ import Map;
 
 public void findDuplicates(M3 model) {
     str code = removeTrailingAndEmptyLines(getProjectJavaContents(model));
+    //TODO: do more efficiently, we do not need to split it again just count \n's
     list[str] splitted = split("\n", code);
-    
-    //println("Original content: \n <code>");
-    list[str] duplicates = [];
+    str deduplicatedCode = code;
     int n = size(splitted), end = 6;
     while(end <= n, n >= 6) {
         int begin = end - 6;
-        list[str] sublist = splitted[begin..end];
-        str rejoined = intercalate("\n", sublist);
-        int occurences = findOccurrences(rejoined, code);
-        if (occurences > 1) {
-            duplicates = duplicates + sublist;
-        } 
+        deduplicatedCode = removeDuplicate(begin, end, n, deduplicatedCode);
         end = end + 1;
+        //int numberOfOccurences = size(occurences);
+        //if (numberOfOccurences > 1) {
+        //    duplicates = duplicates + sublist;
+        //    for (int x <- [1..numberOfOccurences-1]) {
+        //      int position = occurences[x];
+        //      println("Intermediate result:\n <code>");
+        //    }
+        //    //Split alles behalve de eerste occurrence uit de string.
+        //}
     }
-    str duplicatedCode = intercalate("\n", dup(duplicates));
-    println("The following code is duplicated: \n <duplicatedCode>");
+    //str duplicatedCode = intercalate("\n", dup(duplicates));
+    println("The following code is deduplicated: \n <deduplicatedCode>");
 }
 
-private int findOccurrences(str snippet, str allCode) {
-    return size(findAll(allCode, snippet));
+private str removeDuplicate(int begin, int end, int rightMax, str code) {
+    list[str] splitted = split("\n", code); //TODO: do more efficiently
+    list[str] sublist = splitted[begin..end];
+    str rejoined = intercalate("\n", sublist);
+    list[int] occurences = findOccurrences(rejoined, code);
+    
+    str deduplicatedCode;
+    //Keep trying a larger block until either you're out of the file or you find no more duplicates
+    if (rejoined != "" && end+1 <= rightMax && size(occurences) > 1) {
+        deduplicatedCode = removeDuplicate(begin, end+1, rightMax, code);
+    } else {
+        return code;
+    }
+    
+    //Smaller block may still also appear as duplication
+    occurences = findOccurrences(rejoined, deduplicatedCode);
+    if (size(occurences) > 1) {
+        //Remove duplicates in all but first place.
+        for (int x <- [1..end-1]) {
+            int location = occurences[x];
+            //hier nog een index out of bounds
+            str before = substring(rejoined, begin, location-1);
+            str after = substring(rejoined, location + wordLength + 1);
+            deduplicatedCode = before + after;
+        }
+    }
+    return deduplicatedCode;
+}
+
+private list[int] findOccurrences(str snippet, str allCode) {
+    return findAll(allCode, snippet);
 }
 
 public int countLinesOfCode(M3 model) {
