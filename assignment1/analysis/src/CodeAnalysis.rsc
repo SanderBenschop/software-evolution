@@ -35,8 +35,11 @@ private int findOccurrences(str snippet, str allCode) {
 }
 
 public int countLinesOfCode(M3 model) {
-	str code = filterEffectiveLines(getProjectJavaContents(model));	
-	return size(split("\n", code));
+	return countLinesOfCode(getProjectJavaContents(model));
+}
+
+public int countLinesOfCode(str code) {
+	return size(split("\n", filterEffectiveLines(code)));
 }
 
 public str getProjectJavaContents(M3 model) {
@@ -100,3 +103,31 @@ private set[loc] getClasses(set[Declaration] declarations) {
 	}
 	return classes;
 }
+
+
+private map[loc, set[loc]] getClassMethodsMap(set[Declaration] AST, M3 model) {
+	map[loc, set[loc]] classesToMethodsMap = ();
+	for (class <- getProjectClasses(AST)) {
+		classesToMethodsMap += (class: methods(model, class));
+	}
+	
+	return classesToMethodsMap;
+}
+
+public map[loc, int] getUnitSizes(set[Declaration] AST, M3 model) {
+	return getUnitSizes(getClassMethodsMap(AST, model));
+}
+
+public map[loc, int] getUnitSizes(map[loc, set[loc]] classesToMethodsMap) {
+	map[loc, int] sizes = ();
+
+	for (class <- classesToMethodsMap) {
+		set[loc] methods = classesToMethodsMap[class];
+		for (method <- methods) {
+			int unitSize = countLinesOfCode(readFile(method));
+			sizes += (method: unitSize);
+		}  
+	}
+	
+	return sizes;
+} 

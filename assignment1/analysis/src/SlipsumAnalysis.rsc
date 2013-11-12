@@ -13,4 +13,9 @@ public void main() {
 	println("lines: <lines>");
 	
 	findDuplicates(analysis.m3);
+	
+	map[loc, int] unitSizes = getUnitSizes(analysis.AST, analysis.m3);
+	for (unit <- unitSizes) {
+		println("Unit size <unit> is <unitSizes[unit]>");
+	}
 }
