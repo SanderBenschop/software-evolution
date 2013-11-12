@@ -11,4 +11,6 @@ public void main() {
 	tuple[set[Declaration] AST, M3 m3] analysis = performAnalysis(|project://Slipsum|);
 	int lines = countLinesOfCode(analysis.m3);
 	println("lines: <lines>");
+	
+	findDuplicates(analysis.m3);
 }

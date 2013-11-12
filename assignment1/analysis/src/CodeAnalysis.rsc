@@ -9,8 +9,29 @@ import Set;
 import String;
 import Map;
 
-public void findDuplicates(loc projectLocator) {
-	// [*x, block, *y] := anderefilecontent
+public void findDuplicates(M3 model) {
+    str code = removeTrailingAndEmptyLines(getProjectJavaContents(model));
+    list[str] splitted = split("\n", code);
+    
+    //println("Original content: \n <code>");
+    list[str] duplicates = [];
+    int n = size(splitted), end = 6;
+    while(end <= n, n >= 6) {
+        int begin = end - 6;
+        list[str] sublist = splitted[begin..end];
+        str rejoined = intercalate("\n", sublist);
+        int occurences = findOccurrences(rejoined, code);
+        if (occurences > 1) {
+            duplicates = duplicates + sublist;
+        } 
+        end = end + 1;
+    }
+    str duplicatedCode = intercalate("\n", dup(duplicates));
+    println("The following code is duplicated: \n <duplicatedCode>");
+}
+
+private int findOccurrences(str snippet, str allCode) {
+    return size(findAll(allCode, snippet));
 }
 
 public int countLinesOfCode(M3 model) {
