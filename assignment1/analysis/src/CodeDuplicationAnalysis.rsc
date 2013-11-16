@@ -20,7 +20,7 @@ public int findDuplicates(M3 model) {
     while(end <= n, n >= 6) {
         int begin = end - 6;
         println("Main loop: begin is <begin>, end is <end>, n is <n>");
-        deduplicatedCode = removeDuplicate(begin, end, n, deduplicatedCode, []);
+        deduplicatedCode = removeDuplicate(begin, end, n, deduplicatedCode);
         end = end + 1;
     }
     
@@ -32,22 +32,25 @@ public int findDuplicates(M3 model) {
     return duplicatedLines;
 }
 
-private str removeDuplicate(int begin, int end, int rightMax, str code, list[int] occurences) {
+private str removeDuplicate(int begin, int end, int rightMax, str code) {
 	println("Looking to duplicates from <begin> to <end>, max is <rightMax>");
     
     list[str] splitted = split("\n", code);
     int sizeSplitted = size(splitted);
-    if (end > sizeSplitted || end > rightMax || size(occurences) == 1) {
+    if (end > sizeSplitted || end > rightMax) {
     	//Base case
     	return code;
     }
     
 	list[str] sublist = splitted[begin..end];
     str rejoined = intercalate("\n", sublist);
-    occurences = findOccurrences(rejoined, code);
+    list[int] occurences = findOccurrences(rejoined, code);
     
     //Keep trying a larger block until either you're out of the file or you find no more duplicates
-    str deduplicatedCode = removeDuplicate(begin, end+1, rightMax, code, occurences);
+    str deduplicatedCode = code;
+    if (size(occurences) > 1) {
+    	deduplicatedCode = removeDuplicate(begin, end+1, rightMax, code);
+    }
 
     occurences = findOccurrences(rejoined, deduplicatedCode);
     int numberOfOccurences = size(occurences);
