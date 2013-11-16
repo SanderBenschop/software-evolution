@@ -6,11 +6,26 @@ import analysis::m3::metrics::LOC;
 import IO;
 import List;
 import Set;
+import Map;
 import String;
 import Map;
 
 public int countLinesOfCode(M3 model) {
 	return countLinesOfCode(getProjectJavaContents(model));
+}
+	
+public void countLinesOfCode(loc projectLocator) {
+	map[loc, map[loc, str]] filteredClasses = filterCommentsOutOfProject(projectLocator);
+	int linesOfCode = 0;
+	for (map[loc, str] filteredMethods <- range(filteredClasses)) {
+		for (str method <- range(filteredMethods)) {
+			for (/(\S)*\n/ := method) {
+				linesOfCode = linesOfCode + 1;
+			}
+		}
+	}
+	
+	println("Lines of code: <linesOfCode>");
 }
 
 public int countLinesOfCode(str code) {
