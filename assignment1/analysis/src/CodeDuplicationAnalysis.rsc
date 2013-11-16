@@ -50,9 +50,9 @@ private str removeDuplicate(int begin, int end, int rightMax, str code) {
     str deduplicatedCode = code;
     if (size(occurences) > 1) {
     	deduplicatedCode = removeDuplicate(begin, end+1, rightMax, code);
+    	occurences = findOccurrences(rejoined, deduplicatedCode);
     }
 
-    occurences = findOccurrences(rejoined, deduplicatedCode);
     int numberOfOccurences = size(occurences);
     if (numberOfOccurences > 1) {
     	int wordLength = size(rejoined);
