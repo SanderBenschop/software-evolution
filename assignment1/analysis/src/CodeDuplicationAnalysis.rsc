@@ -38,12 +38,10 @@ private str removeDuplicate(int begin, int end, int rightMax, str code) {
     list[str] splitted = split("\n", code);
     int sizeSplitted = size(splitted);
     if (end > sizeSplitted || end > rightMax) {
-    	//Base case
     	return code;
     }
     
-	list[str] sublist = splitted[begin..end];
-    str rejoined = intercalate("\n", sublist);
+    str rejoined = joinStringRange(splitted, begin, end);
     list[int] occurences = findOccurrences(rejoined, code);
     
     //Keep trying a larger block until either you're out of the file or you find no more duplicates
@@ -60,8 +58,7 @@ private str removeDuplicate(int begin, int end, int rightMax, str code) {
         for (int x <- [1..end-1], x < numberOfOccurences) {
             int location = occurences[x], remainingSize = size(deduplicatedCode);
             println("Removing duplicate starting on location <location>, remaining code size is <remainingSize>");
-            str before = substring(deduplicatedCode, 0, location-1);
-            str after = substring(deduplicatedCode, location + wordLength + 1);
+            str before = substring(deduplicatedCode, 0, location-1), after = substring(deduplicatedCode, location + wordLength + 1);
             deduplicatedCode = before + "\n" + after;
             occurences = decrementIntegers(occurences, wordLength);
         }
@@ -76,4 +73,10 @@ private list[int] findOccurrences(str snippet, str allCode) {
 private list[int] decrementIntegers(list[int] integers, int x) {
 	int decrementByX(int element) { return element - x; }
 	return mapper(integers, decrementByX);
+}
+
+
+private str joinStringRange(list[str] fullStringList, int begin, int end) {
+	list[str] sublist = fullStringList[begin..end];
+    return intercalate("\n", sublist);
 }
