@@ -33,7 +33,7 @@ public int findDuplicates(M3 model) {
 }
 
 private str removeDuplicate(int begin, int end, int rightMax, str code) {
-	println("Looking to duplicates from <begin> to <end>, max is <rightMax>");
+	println("Looking for duplicates from <begin> to <end>, max is <rightMax>");
     
     list[str] splitted = split("\n", code);
     int sizeSplitted = size(splitted);
