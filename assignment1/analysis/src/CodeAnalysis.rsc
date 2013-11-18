@@ -6,6 +6,7 @@ import analysis::m3::metrics::LOC;
 import IO;
 import List;
 import Set;
+import Map;
 import String;
 import Map;
 import util::ValueUI;
@@ -37,6 +38,20 @@ private int findOccurrences(str snippet, str allCode) {
 
 public int countLinesOfCode(M3 model) {
 	return countLinesOfCode(getProjectJavaContentsAsString(model));
+}
+	
+public void countLinesOfCode(loc projectLocator) {
+	map[loc, map[loc, str]] filteredClasses = filterCommentsOutOfProject(projectLocator);
+	int linesOfCode = 0;
+	for (map[loc, str] filteredMethods <- range(filteredClasses)) {
+		for (str method <- range(filteredMethods)) {
+			for (/(\S)*\n/ := method) {
+				linesOfCode = linesOfCode + 1;
+			}
+		}
+	}
+	
+	println("Lines of code: <linesOfCode>");
 }
 
 public int countLinesOfCode(str code) {
