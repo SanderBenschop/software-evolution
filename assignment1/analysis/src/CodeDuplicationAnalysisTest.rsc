@@ -13,6 +13,6 @@ import CodeAnalysis;
 
 test bool testDuplicateCodeCount() {
 	tuple[set[Declaration] AST, M3 m3] analysis = performAnalysis(|project://Slipsum|);
-	int duplicateLines = findDuplicates(analysis.m3);
+	int duplicateLines = findDuplicates(analysis.m3); 
 	return duplicateLines == 26;
 }
