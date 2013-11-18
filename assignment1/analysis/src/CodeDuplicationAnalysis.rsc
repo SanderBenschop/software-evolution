@@ -12,7 +12,7 @@ import CodeAnalysis;
 
 public int findDuplicates(M3 model) {
 	println("Starting on reading code into string");
-    str code = removeTrailingAndEmptyLines(getProjectJavaContents(model));
+    str code = removeTrailingAndEmptyLines(getProjectJavaContentsAsString(model));
     println("Finished reading code into string");
     
     str deduplicatedCode = code;
