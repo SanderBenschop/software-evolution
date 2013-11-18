@@ -14,7 +14,6 @@ import String;
 public void main() {
 	tuple[set[Declaration] AST, M3 m3] analysis = performAnalysis(|project://Slipsum|);
 	map[loc, int] cyclomaticComplexityPerUnit = getCyclomaticComplexityPerUnit(analysis.AST);
-	tuple[set[Declaration] AST, M3 m3] analysis = performAnalysis(|project://smallsql0.21_src|);
 	int lines = countLinesOfCode(analysis.m3);
 	println("Lines of code: <lines>");
 
