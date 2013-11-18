@@ -8,9 +8,10 @@ import List;
 import Set;
 import String;
 import Map;
+import util::ValueUI;
 
 public void findDuplicates(M3 model) {
-    str code = removeTrailingAndEmptyLines(getProjectJavaContents(model));
+    str code = removeTrailingAndEmptyLines(getProjectJavaContentsAsString(model));
     list[str] splitted = split("\n", code);
     
     //println("Original content: \n <code>");
@@ -35,26 +36,80 @@ private int findOccurrences(str snippet, str allCode) {
 }
 
 public int countLinesOfCode(M3 model) {
-	return countLinesOfCode(getProjectJavaContents(model));
+	return countLinesOfCode(getProjectJavaContentsAsString(model));
 }
 
 public int countLinesOfCode(str code) {
 	return size(split("\n", filterEffectiveLines(code)));
 }
 
-public str getProjectJavaContents(M3 model) {
-	set[loc] javaFiles = { file | file <- files(model), file.extension == "java" };
+public str getProjectJavaContentsAsString(M3 model) {
+	map[loc, str] contentMap = getProjectJavaContentsAsMap(model);
 	
-	str content = "";
-	for (file <- javaFiles) {
-		str fileContent = readFile(file);
-		content += fileContent;
+	str resultContent = "";
+	for (content <- contentMap) {
+		str fileContent = contentMap[content];
+		resultContent += fileContent;
 		if (!endsWith(fileContent, "\n")) {
-			content += "\n";
+			resultContent += "\n";
 		}
 	}	
 	
-	return content;
+	return resultContent;
+}
+
+public map[loc, str] getProjectJavaContentsAsMap(M3 model) {
+	set[loc] javaFiles = { file | file <- files(model), file.extension == "java" };
+	
+	map[loc, str] contentMap = ();
+	for (file <- javaFiles) {
+		contentMap += (file: readFile(file));
+	}	
+
+
+	return contentMap;
+}
+
+public int countAsserts(Statement AST) {
+	int c = 0;
+	visit(AST) {
+		case \assert(Expression e, _): c = printAndIncrease(c, e);
+		case \assert(Expression e): c = printAndIncrease(c, e);
+		case /<regexStatement:(assert(.*)(\(.*?\))*)>/: 
+			c = printAndIncrease(c, regexStatement);
+	};
+			
+	return c;
+}
+
+private int printAndIncrease(int x, value line) {
+	// iprintln(line);
+	return (x + 1);
+} 
+
+public map[loc, tuple[loc, int]] createClassMethodAssertMap(set[Declaration] AST, M3 model) {
+	map[loc, set[loc]] classesMethodMap = getClassMethodsMap(AST, model);
+	map[loc, tuple[loc, int]] classMethodAssertMap = (); 
+
+	for (class <- classesMethodMap) {
+		for (method <- classesMethodMap[class]) {
+			methodAST = getMethodASTEclipse(method, model=model);	
+			statements = [s | /Statement s := methodAST];
+			int assertCount = 0;
+			for (statement <- statements) {
+				assertCount += countAsserts(statement);
+			}
+			classMethodAssertMap += (class: <method, assertCount>);
+		}
+	}
+	
+	return classMethodAssertMap;
+} 
+
+public num calculateAssertStatements(set[Declaration] AST, M3 model) {
+	classMethodAssertMap = createClassMethodAssertMap(AST, model); 
+	// sum the int values for each method for each class method
+	return sum([tuples[1] | tuples <- range(classMethodAssertMap)]);
 }
 
 public set[loc] getProjectClasses(set[Declaration] AST) {
