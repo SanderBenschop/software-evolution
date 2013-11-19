@@ -109,7 +109,7 @@ public map[loc, tuple[loc, int]] createClassMethodAssertMap(set[Declaration] AST
 	for (class <- classesMethodMap) {
 		for (method <- classesMethodMap[class]) {
 			methodAST = getMethodASTEclipse(method, model=model);	
-			statements = [s | /Statement s := methodAST];
+			statements = [s | /Statement s := methodAST]; 
 			int assertCount = 0;
 			for (statement <- statements) {
 				assertCount += countAsserts(statement);
@@ -184,6 +184,15 @@ private map[loc, set[loc]] getClassMethodsMap(set[Declaration] AST, M3 model) {
 	return classesToMethodsMap;
 }
 
+private map[loc, set[loc]] getNonUnitTestClassMethodsMap(set[Declaration] AST, M3 model) {
+	map[loc, set[loc]] classesToMethodsMap = ();
+	for (class <- getProjectclasses(AST)) {
+		 	println();
+	}
+	
+	return ();
+}
+
 public map[loc, int] getUnitSizes(set[Declaration] AST, M3 model) {
 	return getUnitSizes(getClassMethodsMap(AST, model));
 }
@@ -194,10 +203,28 @@ public map[loc, int] getUnitSizes(map[loc, set[loc]] classesToMethodsMap) {
 	for (class <- classesToMethodsMap) {
 		set[loc] methods = classesToMethodsMap[class];
 		for (method <- methods) {
-			int unitSize = countLinesOfCode(readFile(method));
+			int unitSize = getUnitSize(method);
 			sizes += (method: unitSize);
 		}  
 	}
-	
+		
 	return sizes;
 } 
+
+public int getUnitSize(loc method) {
+	return countLinesOfCode(readFile(method));
+}
+
+public void determineAndPrintUnitSizes(Set[Declaration] AST, M3 model) {
+	int veryHigh = 0, high = 0, medium = 0, low = 0;
+	map[loc, int] unitSizeMap = getUnitSizes(AST, model);
+	for (unit <- unitSizeMap) {
+		size = unitSizeMap[unit];
+		if (size > 100) veryHigh += 1;
+		else if (size > 50) high += 1;
+		else if (medium > 10) medium += 1;
+		else low += 1;
+	}
+	
+	printUnitSizes(low, medium, high, veryHigh);
+}
