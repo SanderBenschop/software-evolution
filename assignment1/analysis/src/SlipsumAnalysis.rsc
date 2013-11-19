@@ -29,11 +29,12 @@ public void main() {
 	int secondsTaken = (cpuTime() - before) / 1000000;
 	println("Duplication search process took <secondsTaken> milliseconds.");
 	
-	map[loc, int] unitSizes = getUnitSizes(analysis.AST, analysis.m3);
+	//map[loc, int] unitSizes = getUnitSizes(analysis.AST, analysis.m3);
 /*	for (unit <- unitSizes) {
 		println("Unit size <unit> is <unitSizes[unit]>");
 	}
 */
-	println("Units: <size(unitSizes)> total sizes: <sum(range(unitSizes))>");
+	//println("Units: <size(unitSizes)> total sizes: <sum(range(unitSizes))>");
 	println("Assert statements: <calculateAssertStatements(analysis.AST, analysis.m3)>");
+	determineAndPrintUnitSizes(analysis.AST, analysis.m3);
 }
