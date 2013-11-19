@@ -10,6 +10,7 @@ import Set;
 import Map;
 import String;
 import Map;
+import util::Math;
 
 public map[loc, int] getCyclomaticComplexityPerUnit(set[Declaration] AST) {
 	map[loc,int] cyclomaticComplexityPerUnit = ();
@@ -32,7 +33,7 @@ public map[loc, int] getCyclomaticComplexityPerUnit(set[Declaration] AST) {
 	return cyclomaticComplexityPerUnit;
 }
 
-public void determineRelativeComplexity(map[loc, int] complexityPerMethod) {
+public void determineRelativeComplexity(map[loc, int] complexityPerMethod, int totalLines) {
 	int simple = 0, moderate = 0, high = 0, veryHigh = 0;
 	for (loc methodLocator <- complexityPerMethod) {
 		int complexity = complexityPerMethod[methodLocator], unitSize = getUnitSize(methodLocator);
@@ -46,8 +47,29 @@ public void determineRelativeComplexity(map[loc, int] complexityPerMethod) {
 			simple += unitSize;
 		}
 	}
-	
 	println("Total simple lines: <simple>, total moderate: <moderate>, total high: <high> and total very high: <veryHigh>");
+	printComplexityRanking(moderate, high, veryHigh, totalLines);
+}
+
+private void printComplexityRanking(int moderate, int high, int veryHigh, int total) {
+	real totalLines = toReal(total), 
+	moderatePercentage = (toReal(moderate) / totalLines) * 100,
+	highPercentage = (toReal(high) / totalLines) * 100,
+	veryHighPercentage = (toReal(veryHigh) / totalLines) * 100;
+	
+	str ranking;
+	if (moderatePercentage <= 25 && highPercentage == 0 && veryHighPercentage == 0) {
+		ranking = "++";
+	} else if (moderatePercentage <= 30 && highPercentage <= 5 && veryHigh == 0) {
+		ranking = "+";
+	} else if (moderatePercentage <= 40 && highPercentage <= 10 && veryHigh == 0) {
+		ranking = "0";
+	} else if (moderatePercentage <= 50 && highPercentage <= 15 && veryHigh <= 5) {
+		ranking = "-";
+	} else {
+		ranking = "--";
+	}
+	println("The cyclomatic complexity rank is <ranking>");
 }
 
 private int determineExpressionComplexity(Expression expr) {
@@ -70,10 +92,8 @@ private int visitExpression(Expression expr) {
 private map[loc, Declaration] getMethodDeclarations(set[Declaration] declarations) {
 	map[loc,Declaration] methodDeclarations = ();
 	for (Declaration compilationUnit <- declarations) {
-		for (javaClass <- compilationUnit.types) {
-			for (methodDeclaration <- javaClass.body) {
-				methodDeclarations += (methodDeclaration@decl : methodDeclaration);
-			}
+		visit (compilationUnit) {
+			case m:\method(_,_,_,_,_) : methodDeclarations += (m@decl : m);
 		}
 	}
 	return methodDeclarations;

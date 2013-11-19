@@ -20,12 +20,12 @@ public int findDuplicates(M3 model) {
     int n = countLinesOfCode(code), end = 6;
     while(end <= n, n >= 6) {
         int begin = end - 6;
-        println("Main loop: begin is <begin>, end is <end>, n is <n>");
+        //println("Main loop: begin is <begin>, end is <end>, n is <n>");
         deduplicatedCode = removeDuplicate(begin, end, n, deduplicatedCode);
         end = end + 1;
     }
     
-    int duplicatedLines = countLinesOfCode(deduplicatedCode);
+    int duplicatedLines = n - countLinesOfCode(deduplicatedCode);
     printDuplicationRating(duplicatedLines, n);
     
     return duplicatedLines;
@@ -43,7 +43,7 @@ private void printDuplicationRating(int duplicatedLines, int linesOfCode) {
 }
 
 private str removeDuplicate(int begin, int end, int rightMax, str code) {
-	println("Looking for duplicates from <begin> to <end>, max is <rightMax>");
+	//println("Looking for duplicates from <begin> to <end>, max is <rightMax>");
     
     list[str] splitted = split("\n", code);
     int sizeSplitted = size(splitted);
@@ -67,7 +67,7 @@ private str removeDuplicate(int begin, int end, int rightMax, str code) {
         //Remove duplicates in all but first place.
         for (int x <- [1..end-1], x < numberOfOccurences) {
             int location = occurences[x], remainingSize = size(deduplicatedCode);
-            println("Removing duplicate starting on location <location>, remaining code size is <remainingSize>");
+            //println("Removing duplicate starting on location <location>, remaining code size is <remainingSize>");
             str before = substring(deduplicatedCode, 0, location-1), after = substring(deduplicatedCode, location + wordLength + 1);
             deduplicatedCode = before + "\n" + after;
             occurences = decrementIntegers(occurences, wordLength);
