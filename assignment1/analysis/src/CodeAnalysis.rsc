@@ -11,31 +11,6 @@ import String;
 import Map;
 import util::ValueUI;
 
-public void findDuplicates(M3 model) {
-    str code = removeTrailingAndEmptyLines(getProjectJavaContentsAsString(model));
-    list[str] splitted = split("\n", code);
-    
-    //println("Original content: \n <code>");
-    list[str] duplicates = [];
-    int n = size(splitted), end = 6;
-    while(end <= n, n >= 6) {
-        int begin = end - 6;
-        list[str] sublist = splitted[begin..end];
-        str rejoined = intercalate("\n", sublist);
-        int occurences = findOccurrences(rejoined, code);
-        if (occurences > 1) {
-            duplicates = duplicates + sublist;
-        } 
-        end = end + 1;
-    }
-    str duplicatedCode = intercalate("\n", dup(duplicates));
-    println("The following code is duplicated: \n <duplicatedCode>");
-}
-
-private int findOccurrences(str snippet, str allCode) {
-    return size(findAll(allCode, snippet));
-}
-
 public int countLinesOfCode(M3 model) {
 	return countLinesOfCode(getProjectJavaContentsAsString(model));
 }
@@ -52,6 +27,20 @@ public void countLinesOfCode(loc projectLocator) {
 	}
 	
 	println("Lines of code: <linesOfCode>");
+}
+
+public void determineLinesOfCodeRanking(int linesOfCode) {
+	// lines of code blabla
+	set[tuple[int lowerboundary, int upperboundary, str rank]] ranking = { <0,66000,"++">, <66000,246000,"+">, <246000,665000,"0">, <665000,1310000,"-">, <1310000,-1,"--"> };
+	
+	for (r <- ranking) {
+	   if (r.lowerboundary <= linesOfCode) {
+	        if (r.upperboundary == -1 || linesOfCode < r.upperboundary) {
+	        	println("Lines of code ranking is: <r.rank>");
+	        	break;
+	        }
+	   }
+	}
 }
 
 public int countLinesOfCode(str code) {
@@ -109,7 +98,7 @@ public map[loc, tuple[loc, int]] createClassMethodAssertMap(set[Declaration] AST
 	for (class <- classesMethodMap) {
 		for (method <- classesMethodMap[class]) {
 			methodAST = getMethodASTEclipse(method, model=model);	
-			statements = [s | /Statement s := methodAST]; 
+			statements = [s | /Statement s := methodAST];
 			int assertCount = 0;
 			for (statement <- statements) {
 				assertCount += countAsserts(statement);
@@ -175,7 +164,7 @@ private set[loc] getClasses(set[Declaration] declarations) {
 }
 
 
-private map[loc, set[loc]] getClassMethodsMap(set[Declaration] AST, M3 model) {
+public map[loc, set[loc]] getClassMethodsMap(set[Declaration] AST, M3 model) {
 	map[loc, set[loc]] classesToMethodsMap = ();
 	for (class <- getProjectClasses(AST)) {
 		classesToMethodsMap += (class: methods(model, class));
@@ -184,35 +173,26 @@ private map[loc, set[loc]] getClassMethodsMap(set[Declaration] AST, M3 model) {
 	return classesToMethodsMap;
 }
 
-private map[loc, set[loc]] getNonUnitTestClassMethodsMap(set[Declaration] AST, M3 model) {
-	map[loc, set[loc]] classesToMethodsMap = ();
-	for (class <- getProjectclasses(AST)) {
-		 	println();
-	}
-	
-	return ();
-}
-
 public map[loc, int] getUnitSizes(set[Declaration] AST, M3 model) {
 	return getUnitSizes(getClassMethodsMap(AST, model));
 }
 
 public map[loc, int] getUnitSizes(map[loc, set[loc]] classesToMethodsMap) {
-	map[loc, int] sizes = ();
+ map[loc, int] sizes = ();
 
-	for (class <- classesToMethodsMap) {
-		set[loc] methods = classesToMethodsMap[class];
-		for (method <- methods) {
-			int unitSize = getUnitSize(method);
-			sizes += (method: unitSize);
-		}  
-	}
-		
-	return sizes;
+ for (class <- classesToMethodsMap) {
+  set[loc] methods = classesToMethodsMap[class];
+  for (method <- methods) {
+   int unitSize = getUnitSize(method);
+   sizes += (method: unitSize);
+  }  
+ }
+ 
+ return sizes;
 } 
 
 public int getUnitSize(loc method) {
-	return countLinesOfCode(readFile(method));
+ return countLinesOfCode(readFile(method));
 }
 
 public void determineAndPrintUnitSizes(Set[Declaration] AST, M3 model) {

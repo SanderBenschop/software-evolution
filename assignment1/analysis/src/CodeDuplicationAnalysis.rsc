@@ -9,6 +9,7 @@ import Set;
 import String;
 import Map;
 import CodeAnalysis;
+import util::Math;
 
 public int findDuplicates(M3 model) {
 	println("Starting on reading code into string");
@@ -19,21 +20,30 @@ public int findDuplicates(M3 model) {
     int n = countLinesOfCode(code), end = 6;
     while(end <= n, n >= 6) {
         int begin = end - 6;
-        println("Main loop: begin is <begin>, end is <end>, n is <n>");
+        //println("Main loop: begin is <begin>, end is <end>, n is <n>");
         deduplicatedCode = removeDuplicate(begin, end, n, deduplicatedCode);
         end = end + 1;
     }
     
-    int codeSize = countLinesOfCode(code), deduplicatedCodeSize = countLinesOfCode(deduplicatedCode), duplicatedLines = codeSize - deduplicatedCodeSize;
-    println("Total code size: <codeSize>");
-    println("Deduplicated code size: <deduplicatedCodeSize>");
-    println("Duplicated lines of code: <duplicatedLines>");
+    int duplicatedLines = n - countLinesOfCode(deduplicatedCode);
+    printDuplicationRating(duplicatedLines, n);
     
     return duplicatedLines;
 }
 
+private void printDuplicationRating(int duplicatedLines, int linesOfCode) {
+	set[tuple[real lowerboundary, real upperboundary, str rank]] ranking = { <0.0,3.0,"++">, <3.0,5.0,"+">, <5.0,10.0,"0">, <10.0,20.0,"-">, <20.0,100.0,"--"> };
+	for (r <- ranking) {
+		real percentageDuplicated = (toReal(duplicatedLines) / toReal(linesOfCode)) * 100;
+   		if (r.lowerboundary <= percentageDuplicated && percentageDuplicated < r.upperboundary) {
+   			println("The duplication rank is <r.rank>, total number of duplicated lines is <duplicatedLines> which is <percentageDuplicated>% of the total of <linesOfCode> lines.");
+   			break;
+   		}
+	}
+}
+
 private str removeDuplicate(int begin, int end, int rightMax, str code) {
-	println("Looking for duplicates from <begin> to <end>, max is <rightMax>");
+	//println("Looking for duplicates from <begin> to <end>, max is <rightMax>");
     
     list[str] splitted = split("\n", code);
     int sizeSplitted = size(splitted);
@@ -57,7 +67,7 @@ private str removeDuplicate(int begin, int end, int rightMax, str code) {
         //Remove duplicates in all but first place.
         for (int x <- [1..end-1], x < numberOfOccurences) {
             int location = occurences[x], remainingSize = size(deduplicatedCode);
-            println("Removing duplicate starting on location <location>, remaining code size is <remainingSize>");
+            //println("Removing duplicate starting on location <location>, remaining code size is <remainingSize>");
             str before = substring(deduplicatedCode, 0, location-1), after = substring(deduplicatedCode, location + wordLength + 1);
             deduplicatedCode = before + "\n" + after;
             occurences = decrementIntegers(occurences, wordLength);
