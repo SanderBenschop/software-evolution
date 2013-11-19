@@ -22,7 +22,8 @@ public void main() {
 	//	int complexity = cyclomaticComplexityPerUnit[methodLocator];
 	//	println("Method <methodLocator> has <complexity> complexity.");
 	//}
-	determineRelativeComplexity(cyclomaticComplexityPerUnit, lines);
+	tuple[int, int, int, int] complexity = determineRelativeComplexity(cyclomaticComplexityPerUnit, lines);
+	int complexityRanking = getComplexityRanking(complexity, lines);
 
 	int before = cpuTime();
 	findDuplicates(analysis.m3);

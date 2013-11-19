@@ -20,20 +20,25 @@ public map[loc, int] getCyclomaticComplexityPerUnit(set[Declaration] AST) {
 		Declaration methodDeclaration = methodDeclarations[methodLocator];
 		int decisionPoints = 0;
 		top-down visit(methodDeclaration.impl) {
+			
 			case \if(Expression condition, _) : decisionPoints += determineExpressionComplexity(condition);
 			case \if(Expression condition, _, _) : decisionPoints += determineExpressionComplexity(condition);				
 			case \while(Expression condition,_) : decisionPoints += determineExpressionComplexity(condition); 
 			case \for(_,Expression condition,_) : decisionPoints += determineExpressionComplexity(condition);
 			case \for(_,Expression condition,_,_) : decisionPoints += determineExpressionComplexity(condition);
 			case \foreach(_,_,_) : decisionPoints += 1;
-			case \switch(_,_) : decisionPoints += 1;
+			
+			case \case(_) : decisionPoints += 1;
+			case \defaultCase() : decisionPoints += 1;
+			
+			case \catch(_,_) : decisionPoints += 1;
 		}
 		cyclomaticComplexityPerUnit += (methodLocator : decisionPoints + 1);
 	}
 	return cyclomaticComplexityPerUnit;
 }
 
-public void determineRelativeComplexity(map[loc, int] complexityPerMethod, int totalLines) {
+public tuple[int, int, int, int] determineRelativeComplexity(map[loc, int] complexityPerMethod, int totalLines) {
 	int simple = 0, moderate = 0, high = 0, veryHigh = 0;
 	for (loc methodLocator <- complexityPerMethod) {
 		int complexity = complexityPerMethod[methodLocator], unitSize = getUnitSize(methodLocator);
@@ -48,28 +53,41 @@ public void determineRelativeComplexity(map[loc, int] complexityPerMethod, int t
 		}
 	}
 	println("Total simple lines: <simple>, total moderate: <moderate>, total high: <high> and total very high: <veryHigh>");
-	printComplexityRanking(moderate, high, veryHigh, totalLines);
+	return <simple, moderate, high, veryHigh>;
 }
 
-private void printComplexityRanking(int moderate, int high, int veryHigh, int total) {
+public int getComplexityRanking(tuple[int simple, int moderate, int high, int veryHigh] complexity, int total) {
+	int simple = complexity.simple, moderate = complexity.moderate, high = complexity.moderate, veryHigh = complexity.veryHigh;
+	
 	real totalLines = toReal(total), 
+	simplePercentage = (toReal(simple) / totalLines) * 100,
 	moderatePercentage = (toReal(moderate) / totalLines) * 100,
 	highPercentage = (toReal(high) / totalLines) * 100,
 	veryHighPercentage = (toReal(veryHigh) / totalLines) * 100;
 	
+	int rankingNumber;
 	str ranking;
 	if (moderatePercentage <= 25 && highPercentage == 0 && veryHighPercentage == 0) {
 		ranking = "++";
+		rankingNumber = 2;
 	} else if (moderatePercentage <= 30 && highPercentage <= 5 && veryHigh == 0) {
 		ranking = "+";
+		rankingNumber = 1;
 	} else if (moderatePercentage <= 40 && highPercentage <= 10 && veryHigh == 0) {
 		ranking = "0";
+		rankingNumber = 0;
 	} else if (moderatePercentage <= 50 && highPercentage <= 15 && veryHigh <= 5) {
 		ranking = "-";
+		rankingNumber = -1;
 	} else {
 		ranking = "--";
+		rankingNumber = -2;
 	}
+	
+	println("The percentage of simple code is <simplePercentage>%, moderate: <moderatePercentage>%, high: <highPercentage>% and very high: <veryHighPercentage>%");
 	println("The cyclomatic complexity rank is <ranking>");
+	
+	return rankingNumber;
 }
 
 private int determineExpressionComplexity(Expression expr) {
@@ -81,14 +99,13 @@ private int visitExpression(Expression expr) {
 	top-down visit(expr) {
 		case \infix(Expression lhs, str operator, Expression rhs, _) : {
 			int complexityLhs = visitExpression(lhs), complexityRhs = visitExpression(rhs);
-			int andComplexity = (operator == "&&") ? 2 : 0;
+			int andComplexity = (operator == "&&") || (operator == "||") ? 2 : 0;
 			return complexityLhs + complexityRhs + andComplexity;
 		}
 	}
 	return 0;
 }
 
-//Refactor: getMethodASTEclipse oid
 private map[loc, Declaration] getMethodDeclarations(set[Declaration] declarations) {
 	map[loc,Declaration] methodDeclarations = ();
 	for (Declaration compilationUnit <- declarations) {

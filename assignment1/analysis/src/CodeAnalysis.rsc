@@ -30,7 +30,6 @@ public void countLinesOfCode(loc projectLocator) {
 }
 
 public void determineLinesOfCodeRanking(int linesOfCode) {
-	// lines of code blabla
 	set[tuple[int lowerboundary, int upperboundary, str rank]] ranking = { <0,66000,"++">, <66000,246000,"+">, <246000,665000,"0">, <665000,1310000,"-">, <1310000,-1,"--"> };
 	
 	for (r <- ranking) {
