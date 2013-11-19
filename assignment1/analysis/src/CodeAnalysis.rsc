@@ -189,15 +189,19 @@ public map[loc, int] getUnitSizes(set[Declaration] AST, M3 model) {
 }
 
 public map[loc, int] getUnitSizes(map[loc, set[loc]] classesToMethodsMap) {
-	map[loc, int] sizes = ();
+ map[loc, int] sizes = ();
 
-	for (class <- classesToMethodsMap) {
-		set[loc] methods = classesToMethodsMap[class];
-		for (method <- methods) {
-			int unitSize = countLinesOfCode(readFile(method));
-			sizes += (method: unitSize);
-		}  
-	}
-	
-	return sizes;
+ for (class <- classesToMethodsMap) {
+  set[loc] methods = classesToMethodsMap[class];
+  for (method <- methods) {
+   int unitSize = getUnitSize(method);
+   sizes += (method: unitSize);
+  }  
+ }
+ 
+ return sizes;
 } 
+
+public int getUnitSize(loc method) {
+ return countLinesOfCode(readFile(method));
+}

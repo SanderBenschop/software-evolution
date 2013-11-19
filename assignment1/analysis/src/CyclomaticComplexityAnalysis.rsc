@@ -1,5 +1,6 @@
 module CyclomaticComplexityAnalysis
 
+import CodeAnalysis;
 import lang::java::jdt::m3::AST;
 import lang::java::jdt::m3::Core;
 import analysis::m3::metrics::LOC;
@@ -14,34 +15,55 @@ public map[loc, int] getCyclomaticComplexityPerUnit(set[Declaration] AST) {
 	map[loc,int] cyclomaticComplexityPerUnit = ();
 	
 	map[loc, Declaration] methodDeclarations = getMethodDeclarations(AST);
-	//Hierna gaan we voor alle implementaties van de method blokken recursief op zoek naar if's, for's, while's, (do-while?) en mogelijk nog een paar dingen.
 	for (loc methodLocator <- methodDeclarations) {
 		Declaration methodDeclaration = methodDeclarations[methodLocator];
-		int decisionPoints = 0, returnStatements = 0;
-		visit(methodDeclaration.impl) {
-			
-			/* Decision points */
-			case \if(_, _) : decisionPoints += 1;
-			case \if(_, _, _) : decisionPoints += 1;
-			
-			case \do(_,_) : decisionPoints += 1;
-			case \while(_,_) : decisionPoints += 1;
-			case \for(_,_,_) : decisionPoints += 1;
-			case \for(_,_,_,_) : decisionPoints += 1;
+		int decisionPoints = 0;
+		top-down visit(methodDeclaration.impl) {
+			case \if(Expression condition, _) : decisionPoints += determineExpressionComplexity(condition);
+			case \if(Expression condition, _, _) : decisionPoints += determineExpressionComplexity(condition);				
+			case \while(Expression condition,_) : decisionPoints += determineExpressionComplexity(condition); 
+			case \for(_,Expression condition,_) : decisionPoints += determineExpressionComplexity(condition);
+			case \for(_,Expression condition,_,_) : decisionPoints += determineExpressionComplexity(condition);
 			case \foreach(_,_,_) : decisionPoints += 1;
-						
-			//case \switch(_,_) : decisionPoints += 1; Do we count this?
-			case \case(_) : decisionPoints += 1;
-			case \defaultCase() : decisionPoints += 1;
-
-			/* Flow interruption, should we count it if it's on the last line as well? */
-			case \return() : returnStatements += 1;
-			case \return(_) : returnStatements += 1;
+			case \switch(_,_) : decisionPoints += 1;
 		}
-		
-		println("Function with loc <methodLocator> has <decisionPoints> decision points and <returnStatements> return statements.");
+		cyclomaticComplexityPerUnit += (methodLocator : decisionPoints + 1);
 	}
-	return ();
+	return cyclomaticComplexityPerUnit;
+}
+
+public void determineRelativeComplexity(map[loc, int] complexityPerMethod) {
+	int simple = 0, moderate = 0, high = 0, veryHigh = 0;
+	for (loc methodLocator <- complexityPerMethod) {
+		int complexity = complexityPerMethod[methodLocator], unitSize = getUnitSize(methodLocator);
+		if (complexity > 50) {
+			veryHigh += unitSize;
+		} else if(complexity >= 21) {
+			high += unitSize;
+		} else if(complexity >= 11) {
+			moderate += unitSize;
+		} else {
+			simple += unitSize;
+		}
+	}
+	
+	println("Total simple lines: <simple>, total moderate: <moderate>, total high: <high> and total very high: <veryHigh>");
+}
+
+private int determineExpressionComplexity(Expression expr) {
+	int expressionComplexity = visitExpression(expr);
+	return (expressionComplexity == 0) ? 1 : expressionComplexity;
+}
+
+private int visitExpression(Expression expr) {
+	top-down visit(expr) {
+		case \infix(Expression lhs, str operator, Expression rhs, _) : {
+			int complexityLhs = visitExpression(lhs), complexityRhs = visitExpression(rhs);
+			int andComplexity = (operator == "&&") ? 2 : 0;
+			return complexityLhs + complexityRhs + andComplexity;
+		}
+	}
+	return 0;
 }
 
 //Refactor: getMethodASTEclipse oid

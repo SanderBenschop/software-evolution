@@ -9,6 +9,7 @@ import Set;
 import String;
 import Map;
 import CodeAnalysis;
+import util::Math;
 
 public int findDuplicates(M3 model) {
 	println("Starting on reading code into string");
@@ -24,12 +25,21 @@ public int findDuplicates(M3 model) {
         end = end + 1;
     }
     
-    int codeSize = countLinesOfCode(code), deduplicatedCodeSize = countLinesOfCode(deduplicatedCode), duplicatedLines = codeSize - deduplicatedCodeSize;
-    println("Total code size: <codeSize>");
-    println("Deduplicated code size: <deduplicatedCodeSize>");
-    println("Duplicated lines of code: <duplicatedLines>");
+    int duplicatedLines = countLinesOfCode(deduplicatedCode);
+    printDuplicationRating(duplicatedLines, n);
     
     return duplicatedLines;
+}
+
+private void printDuplicationRating(int duplicatedLines, int linesOfCode) {
+	set[tuple[real lowerboundary, real upperboundary, str rank]] ranking = { <0.0,3.0,"++">, <3.0,5.0,"+">, <5.0,10.0,"0">, <10.0,20.0,"-">, <20.0,100.0,"--"> };
+	for (r <- ranking) {
+		real percentageDuplicated = (toReal(duplicatedLines) / toReal(linesOfCode)) * 100;
+   		if (r.lowerboundary <= percentageDuplicated && percentageDuplicated < r.upperboundary) {
+   			println("The duplication rank is <r.rank>, total number of duplicated lines is <duplicatedLines> which is <percentageDuplicated>% of the total of <linesOfCode> lines.");
+   			break;
+   		}
+	}
 }
 
 private str removeDuplicate(int begin, int end, int rightMax, str code) {
