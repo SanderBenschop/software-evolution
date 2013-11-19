@@ -193,3 +193,17 @@ public map[loc, int] getUnitSizes(map[loc, set[loc]] classesToMethodsMap) {
 public int getUnitSize(loc method) {
  return countLinesOfCode(readFile(method));
 }
+
+public void determineAndPrintUnitSizes(Set[Declaration] AST, M3 model) {
+	int veryHigh = 0, high = 0, medium = 0, low = 0;
+	map[loc, int] unitSizeMap = getUnitSizes(AST, model);
+	for (unit <- unitSizeMap) {
+		size = unitSizeMap[unit];
+		if (size > 100) veryHigh += 1;
+		else if (size > 50) high += 1;
+		else if (medium > 10) medium += 1;
+		else low += 1;
+	}
+	
+	printUnitSizes(low, medium, high, veryHigh);
+}
