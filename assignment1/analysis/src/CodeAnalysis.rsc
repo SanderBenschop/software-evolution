@@ -10,6 +10,7 @@ import Map;
 import String;
 import Map;
 import util::ValueUI;
+import util::Math;
 
 public int countLinesOfCode(M3 model) {
 	return countLinesOfCode(getProjectJavaContentsAsString(model));
@@ -191,19 +192,41 @@ public map[loc, int] getUnitSizes(map[loc, set[loc]] classesToMethodsMap) {
 } 
 
 public int getUnitSize(loc method) {
- return countLinesOfCode(readFile(method));
+	return countLinesOfCode(readFile(method));
 }
 
-public void determineAndPrintUnitSizes(Set[Declaration] AST, M3 model) {
+public void determineAndPrintUnitSizes(set[Declaration] AST, M3 model) {
 	int veryHigh = 0, high = 0, medium = 0, low = 0;
 	map[loc, int] unitSizeMap = getUnitSizes(AST, model);
 	for (unit <- unitSizeMap) {
-		size = unitSizeMap[unit];
+		int size = unitSizeMap[unit];
 		if (size > 100) veryHigh += 1;
 		else if (size > 50) high += 1;
 		else if (medium > 10) medium += 1;
 		else low += 1;
 	}
 	
-	printUnitSizes(low, medium, high, veryHigh);
+	printUnitSizes(medium, high, veryHigh, size(unitSizeMap));
+}
+
+private void printUnitSizes(int moderate, int high, int veryHigh, int total) {
+	real totalLines = toReal(total), 
+	
+	moderatePercentage = (toReal(moderate) / totalLines) * 100,
+	highPercentage = (toReal(high) / totalLines) * 100,
+	veryHighPercentage = (toReal(veryHigh) / totalLines) * 100;
+	
+	str ranking;
+	if (moderatePercentage <= 25 && highPercentage == 0 && veryHighPercentage == 0) {
+		ranking = "++";
+	} else if (moderatePercentage <= 30 && highPercentage <= 5 && veryHigh == 0) {
+		ranking = "+";
+	} else if (moderatePercentage <= 40 && highPercentage <= 10 && veryHigh == 0) {
+		ranking = "0";
+	} else if (moderatePercentage <= 50 && highPercentage <= 15 && veryHigh <= 5) {
+		ranking = "-";
+	} else {
+		ranking = "--";
+	}
+	println("The unit size rank is <ranking>");
 }
